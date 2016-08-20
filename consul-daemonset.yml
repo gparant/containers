@@ -1,0 +1,70 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    name: consul
+  name: consul
+spec:
+  #type: NodePort
+  clusterIP: None
+  ports:
+    - port: 8500
+      name: consul-http
+      targetPort: consul-http
+  selector:
+    daemon: consul
+---
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: consul
+  labels:
+    app: consul
+spec:
+  template:
+    metadata:
+      name: consul
+      labels:
+        daemon: consul
+    spec:
+      #securityContext:
+      #  fsGroup: 1000
+      containers:
+      - name: consul
+        image: consul
+        imagePullPolicy: Always
+        #command:
+        #  - "ping"
+        #  - "8.8.8.8"
+        args:
+          - "agent"
+          - "-server"
+          - "-client"
+          - "0.0.0.0"
+          - "-recursor"
+          - "8.8.8.8"
+          - "-bootstrap-expect"
+          - "3"
+          - "-retry-join"
+          - "consul"
+          - "-ui"
+        ports:
+        - name: consul-http
+          containerPort: 8500
+        volumeMounts:
+        - name: consul-data
+          mountPath: /data
+        - name: ca-certificates
+          mountPath: /etc/ssl/certs
+        env:
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+      volumes:
+      - name: consul-data
+        emptyDir: {}
+      - name: ca-certificates
+        hostPath:
+          path: /usr/share/ca-certificates/

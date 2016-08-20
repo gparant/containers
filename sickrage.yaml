@@ -1,0 +1,52 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: sickrage
+  labels:
+    app: sickrage
+spec:
+  selector:
+    app: sickrage
+  ports:
+  - port: 8081
+    targetPort: sick-port
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: sickrage
+  labels:
+    app: sickrage
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: sickrage
+    spec:
+      securityContext:
+        fsGroup: 5001
+      containers:
+      - name: sickrage
+        image: "vsense/sickrage:latest"
+        ports:
+        - name: sick-port
+          containerPort: 8081
+        volumeMounts:
+        - name: sickrage-config
+          mountPath: /config
+        - name: sickrage-downloads
+          mountPath: /downloads
+        env:
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+      restartPolicy: Always
+      volumes:
+      - name: sickrage-config
+        hostPath:
+          path: /srv/configs/sickrage
+      - name: sickrage-downloads
+        hostPath:
+          path: /srv/seedbox

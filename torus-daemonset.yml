@@ -1,0 +1,45 @@
+---
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: torus
+  labels:
+    app: torus
+spec:
+  template:
+    metadata:
+      name: torus
+      labels:
+        daemon: torus
+    spec:
+      containers:
+      - name: torus
+        image: quay.io/coreos/torus:latest
+        imagePullPolicy: Always
+        ports:
+        - name: torus-peer
+          containerPort: 40000
+        - name: torus-http
+          containerPort: 4321
+        env:
+        - name: ETCD_HOST
+          value: 10.3.0.100
+        - name: STORAGE_SIZE
+          value: 5GiB
+        - name: LISTEN_HOST
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        - name: AUTO_JOIN
+          value: "1"
+        - name: DEBUG_INIT
+          value: "1"
+        - name: DROP_MOUNT_BIN
+          value: "0"
+        volumeMounts:
+          - name: torus-data
+            mountPath: /data
+      volumes:
+        - name: torus-data
+          hostPath:
+            path: /srv/torus
