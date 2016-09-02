@@ -28,7 +28,7 @@ spec:
         fsGroup: 5001
       containers:
       - name: sickrage
-        image: "vsense/sickrage:latest"
+        image: "vsense/sickrage:master"
         ports:
         - name: sick-port
           containerPort: 8081

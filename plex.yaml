@@ -30,6 +30,12 @@ spec:
         fsGroup: 5001
       containers:
       - name: plex
+        lifecycle:
+          preStop:
+            exec:
+              command:
+              - "rm"
+              - "/config/Plex Media Server/plexmediaserver.pid"
         image: "vsense/plex:latest"
         ports:
         - name: plex-port

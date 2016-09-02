@@ -55,6 +55,12 @@ spec:
         fsGroup: 5001
       containers:
       - name: rtorrent
+        lifecycle:
+          preStop:
+            exec:
+              command:
+              - "rm"
+              - "/download/sessions/rtorrent.lock"
         image: "vsense/rtorrent:latest"
         ports:
         - containerPort: 80
