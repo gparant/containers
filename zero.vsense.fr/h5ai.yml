@@ -1,3 +1,4 @@
+---
 apiVersion: v1
 kind: Service
 metadata:
@@ -8,8 +9,8 @@ spec:
   selector:
     app: h5ai
   ports:
-  - port: 80
-    targetPort: h5ai-port
+    - port: 80
+      targetPort: h5ai-port
 ---
 apiVersion: extensions/v1beta1
 kind: Deployment
@@ -27,20 +28,20 @@ spec:
       securityContext:
         fsGroup: 5001
       containers:
-      - name: h5ai
-        image: "vsense/h5ai:latest"
-        ports:
-        - name: h5ai-port
-          containerPort: 80
-        volumeMounts:
-        - name: h5ai-directory
-          mountPath: /var/www
-        env:
-        - name: POD_IP
-          valueFrom:
-            fieldRef:
-              fieldPath: status.podIP
+        - name: h5ai
+          image: "vsense/h5ai:latest"
+          ports:
+            - name: h5ai-port
+              containerPort: 80
+          volumeMounts:
+            - name: h5ai-directory
+              mountPath: /var/www
+          env:
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
       volumes:
-      - name: h5ai-directory
-        hostPath:
-          path: /srv/seedbox
+        - name: h5ai-directory
+          hostPath:
+            path: /srv/seedbox
