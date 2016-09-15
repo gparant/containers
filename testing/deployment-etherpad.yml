@@ -1,17 +1,3 @@
-apiVersion: v1
-kind: Service
-metadata:
-    name: etherpad
-    labels:
-        app: etherpad
-spec:
-    selector:
-        app: etherpad
-    ports:
-        - port: 80
-          targetPort: etherpad-port
-    type: NodePort
----
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
