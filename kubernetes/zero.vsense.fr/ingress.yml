@@ -2,6 +2,7 @@
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
+  namespace: default
   name: seedbox
   annotations:
     kubernetes.io/ingress.class: "traefik"
@@ -37,12 +38,11 @@ spec:
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
+  namespace: default
   name: traefik
   annotations:
     kubernetes.io/ingress.class: "traefik"
 spec:
-  tls:
-    - secretName: archifleks-net-ssl
   rules:
     - host: traefik.archifleks.net
       http:
@@ -54,16 +54,15 @@ spec:
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: tectonic-console
+  namespace: kube-system
+  name: kubernetes-dashboard
   annotations:
     kubernetes.io/ingress.class: "traefik"
 spec:
-  tls:
-    - secretName: archifleks-net-ssl
   rules:
-    - host: tectonic.archifleks.net
+    - host: kubernetes.archifleks.net
       http:
         paths:
           - backend:
-              serviceName: tectonic-console
-              servicePort: 9000
+              serviceName: kubernetes-dashboard
+              servicePort: 80
