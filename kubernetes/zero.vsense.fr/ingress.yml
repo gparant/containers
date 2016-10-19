@@ -34,6 +34,12 @@ spec:
           - backend:
               serviceName: couchpotato
               servicePort: 5050
+    - host: muximux.archifleks.net
+      http:
+        paths:
+          - backend:
+              serviceName: muximux
+              servicePort: 80
 ---
 apiVersion: extensions/v1beta1
 kind: Ingress
