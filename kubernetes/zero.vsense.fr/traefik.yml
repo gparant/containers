@@ -40,25 +40,19 @@ data:
     [entryPoints]
       [entryPoints.http]
       address = ":80"
-      #[entryPoints.http.redirect]
-      #entryPoint = "https"
-      [entryPoints.http.auth.basic]
-      users = ["klefevre:$apr1$k2qslCn6$0OgA8vhnyC8nJ99YfJMOM/"]
+      [entryPoints.http.redirect]
+      entryPoint = "https"
       [entryPoints.https.auth.basic]
       users = ["klefevre:$apr1$k2qslCn6$0OgA8vhnyC8nJ99YfJMOM/"]
       [entryPoints.https]
       address = ":443"
       [entryPoints.https.tls]
-        #[[entryPoints.https.tls.certificates]]
-        #CertFile = "/ssl/tls.crt"
-        #KeyFile = "/ssl/tls.key"
     [acme]
     email = "lefevre.kevin@gmail.com"
     storageFile = "/acme/acme.json"
     entryPoint = "https"
     onDemand = true
     onHostRule = true
-    caServer = "https://acme-staging.api.letsencrypt.org/directory"
     [[acme.domains]]
     main = "archifleks.net"
 ---
