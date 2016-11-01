@@ -10,7 +10,23 @@ spec:
     app: plex
   ports:
     - port: 32400
-      targetPort: plex-port
+      protocol: TCP
+      name: plex-32400-tcp
+    - port: 32400
+      protocol: UDP
+      name: plex-32400-udp
+    - port: 32469
+      protocol: TCP
+      name: plex-32469-tcp
+    - port: 32469
+      protocol: UDP
+      name: plex-32469-udp
+    - port: 5353
+      protocol: UDP
+      name: plex-5353-udp
+    - port: 1900
+      protocol: UDP
+      name: plex-1900-udp
   externalIPs:
     - 178.32.28.59
 ---
@@ -22,7 +38,7 @@ metadata:
     app: plex
 spec:
   replicas: 1
-  revisionHistoryLimit: 0
+  revisionHistoryLimit: 1
   template:
     metadata:
       labels:
@@ -38,20 +54,34 @@ spec:
                 command:
                   - "rm"
                   - "/config/Plex Media Server/plexmediaserver.pid"
-          image: "vsense/plex:latest"
+          image: "linuxserver/plex"
           ports:
-            - name: plex-port
-              containerPort: 32400
+            - containerPort: 32400
+              protocol: TCP
+            - containerPort: 32400
+              protocol: UDP
+            - containerPort: 32469
+              protocol: TCP
+            - containerPort: 32469
+              protocol: UDP
+            - containerPort: 5353
+              protocol: UDP
+            - containerPort: 1900
+              protocol: UDP
           volumeMounts:
             - name: plex-config
-              mountPath: /config
+              mountPath: "/config/Library/Application Support"
             - name: plex-library
               mountPath: /library
           env:
-            - name: POD_IP
-              valueFrom:
-                fieldRef:
-                  fieldPath: status.podIP
+            - name: VERSION
+              value: "latest"
+            - name: PGID
+              value: "5001"
+            - name: PUID
+              value: "5001"
+            - name: TZ
+              value: "Europe/Paris"
       volumes:
         - name: plex-config
           hostPath:
