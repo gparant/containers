@@ -10,7 +10,6 @@ spec:
     app: couchpotato
   ports:
     - port: 5050
-      targetPort: couch-port
 ---
 apiVersion: extensions/v1beta1
 kind: Deployment
@@ -30,24 +29,30 @@ spec:
         fsGroup: 5001
       containers:
         - name: couchpotato
-          image: "vsense/couchpotato:latest"
+          image: "linuxserver/couchpotato"
           ports:
-            - name: couch-port
-              containerPort: 5050
+            - containerPort: 5050
           volumeMounts:
+            - name: couchpotato-data
+              mountPath: /config/data
             - name: couchpotato-config
-              mountPath: /config
+              mountPath: /config/config.ini
             - name: couchpotato-downloads
               mountPath: /downloads
           env:
-            - name: POD_IP
-              valueFrom:
-                fieldRef:
-                  fieldPath: status.podIP
+            - name: PGID
+              value: "5001"
+            - name: PUID
+              value: "5001"
+            - name: TZ
+              value: Europe/Paris
       volumes:
-        - name: couchpotato-config
+        - name: couchpotato-data
           hostPath:
             path: /srv/configs/couchpotato
+        - name: couchpotato-config
+          hostPath:
+            path: /srv/configs/couchpotato/config.ini
         - name: couchpotato-downloads
           hostPath:
             path: /srv/seedbox
