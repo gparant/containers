@@ -1,0 +1,52 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: muximux
+  labels:
+    app: muximux
+spec:
+  selector:
+    app: muximux
+  ports:
+    - port: 80
+      targetPort: muximux-port
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: muximux
+  labels:
+    app: muximux
+spec:
+  replicas: 1
+  revisionHistoryLimit: 0
+  template:
+    metadata:
+      labels:
+        app: muximux
+    spec:
+      securityContext:
+        fsGroup: 5001
+      containers:
+        - name: muximux
+          image: "linuxserver/muximux"
+          ports:
+            - name: muximux-port
+              containerPort: 80
+          volumeMounts:
+            - name: muximux-config
+              mountPath: /config
+          env:
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: PUID
+              value: "5001"
+            - name: PGID
+              value: "5001"
+      volumes:
+        - name: muximux-config
+          hostPath:
+            path: /srv/configs/muximux

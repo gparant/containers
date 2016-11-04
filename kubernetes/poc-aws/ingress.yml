@@ -1,0 +1,16 @@
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  namespace: default
+  name: seedbox
+  annotations:
+    kubernetes.io/ingress.class: "traefik"
+spec:
+  rules:
+    - host: tv.archifleks.xyz
+      http:
+        paths:
+          - backend:
+              serviceName: sickrage
+              servicePort: 8081

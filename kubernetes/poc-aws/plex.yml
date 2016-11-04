@@ -1,0 +1,61 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: plex
+  labels:
+    app: plex
+spec:
+  selector:
+    app: plex
+  ports:
+    - port: 32400
+      targetPort: plex-port
+  externalIPs:
+    - 178.32.28.59
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: plex
+  labels:
+    app: plex
+spec:
+  replicas: 1
+  revisionHistoryLimit: 0
+  template:
+    metadata:
+      labels:
+        app: plex
+    spec:
+      securityContext:
+        fsGroup: 5001
+      containers:
+        - name: plex
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                  - "rm"
+                  - "/config/Plex Media Server/plexmediaserver.pid"
+          image: "vsense/plex:latest"
+          ports:
+            - name: plex-port
+              containerPort: 32400
+          volumeMounts:
+            - name: plex-config
+              mountPath: /config
+            - name: plex-library
+              mountPath: /library
+          env:
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+      volumes:
+        - name: plex-config
+          hostPath:
+            path: /srv/configs/plex
+        - name: plex-library
+          hostPath:
+            path: /srv/seedbox

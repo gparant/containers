@@ -1,0 +1,80 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sickrage
+  labels:
+    app: sickrage
+spec:
+  selector:
+    app: sickrage
+  ports:
+    - port: 8081
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: sickrage-config
+  annotations:
+    volume.beta.kubernetes.io/storage-class: "ebs-eu-west-1a"
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: sickrage-data
+  annotations:
+    volume.beta.kubernetes.io/storage-class: "ebs-eu-west-1a"
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: sickrage
+  labels:
+    app: sickrage
+spec:
+  replicas: 1
+  revisionHistoryLimit: 0
+  template:
+    metadata:
+      labels:
+        app: sickrage
+    spec:
+      securityContext:
+        fsGroup: 5001
+      containers:
+        - name: sickrage
+          image: "linuxserver/sickrage"
+          ports:
+            - name: sick-port
+              containerPort: 8081
+          volumeMounts:
+            - name: sickrage-config
+              mountPath: /config
+            - name: sickrage-downloads
+              mountPath: /downloads
+          env:
+            - name: PGID
+              value: "5001"
+            - name: PUID
+              value: "5001"
+            - name: TZ
+              value: Europe/Paris
+      volumes:
+        - name: sickrage-config
+          persistentVolumeClaim:
+            claimName: sickrage-config
+        - name: sickrage-downloads
+          persistentVolumeClaim:
+            claimName: sickrage-data

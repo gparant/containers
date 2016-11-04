@@ -49,6 +49,7 @@ data:
       [entryPoints.https.tls]
     [acme]
     email = "lefevre.kevin@gmail.com"
+    caServer = "https://acme-staging.api.letsencrypt.org/directory"
     storageFile = "/acme/acme.json"
     entryPoint = "https"
     onDemand = true
