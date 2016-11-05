@@ -39,12 +39,14 @@ spec:
             - name: sickrage-downloads
               mountPath: /downloads
           env:
+            - name: VERSION
+              value: "latest"
             - name: PGID
               value: "5001"
             - name: PUID
               value: "5001"
             - name: TZ
-              value: Europe/Paris
+              value: "Europe/Paris"
       volumes:
         - name: sickrage-config
           hostPath:

@@ -32,16 +32,11 @@ spec:
         - name: muximux
           image: "linuxserver/muximux"
           ports:
-            - name: muximux-port
-              containerPort: 80
+            - containerPort: 80
           volumeMounts:
             - name: muximux-config
               mountPath: /config
           env:
-            - name: POD_IP
-              valueFrom:
-                fieldRef:
-                  fieldPath: status.podIP
             - name: PUID
               value: "5001"
             - name: PGID
