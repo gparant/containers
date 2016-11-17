@@ -40,6 +40,22 @@ spec:
       name: rtorrent-5000
 ---
 apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  namespace: default
+  name: torrents
+  annotations:
+    kubernetes.io/ingress.class: "traefik"
+spec:
+  rules:
+    - host: torrents.archifleks.net
+      http:
+        paths:
+          - backend:
+              serviceName: rtorrent-internal
+              servicePort: 80
+---
+apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: rtorrent
@@ -57,13 +73,14 @@ spec:
         fsGroup: 5001
       containers:
         - name: rtorrent
+          image: "vsense/rtorrent:latest"
+          imagePullPolicy: Always
           lifecycle:
             preStop:
               exec:
                 command:
                   - "rm"
                   - "/download/sessions/rtorrent.lock"
-          image: "vsense/rtorrent:latest"
           ports:
             - containerPort: 80
             - containerPort: 5000
@@ -74,11 +91,6 @@ spec:
               mountPath: /rutorrent
             - name: rtorrent-downloads
               mountPath: /downloads
-          env:
-            - name: POD_IP
-              valueFrom:
-                fieldRef:
-                  fieldPath: status.podIP
       volumes:
         - name: rutorrent-config
           hostPath:

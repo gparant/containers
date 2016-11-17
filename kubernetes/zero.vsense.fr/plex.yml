@@ -55,6 +55,7 @@ spec:
                   - "rm"
                   - "/config/Plex Media Server/plexmediaserver.pid"
           image: "linuxserver/plex"
+          imagePullPolicy: Always
           ports:
             - containerPort: 32400
               protocol: TCP

@@ -13,6 +13,21 @@ spec:
       targetPort: h5ai-port
 ---
 apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: seedbox
+  annotations:
+    kubernetes.io/ingress.class: "traefik"
+spec:
+  rules:
+    - host: seedbox.archifleks.net
+      http:
+        paths:
+          - backend:
+              serviceName: h5ai
+              servicePort: 80
+---
+apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: h5ai
@@ -31,17 +46,13 @@ spec:
       containers:
         - name: h5ai
           image: "vsense/h5ai:latest"
+          imagePullPolicy: Always
           ports:
             - name: h5ai-port
               containerPort: 80
           volumeMounts:
             - name: h5ai-directory
               mountPath: /var/www
-          env:
-            - name: POD_IP
-              valueFrom:
-                fieldRef:
-                  fieldPath: status.podIP
       volumes:
         - name: h5ai-directory
           hostPath:

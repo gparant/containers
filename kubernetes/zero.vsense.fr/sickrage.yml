@@ -12,6 +12,21 @@ spec:
     - port: 8081
 ---
 apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: sickrage
+  annotations:
+    kubernetes.io/ingress.class: "traefik"
+spec:
+  rules:
+    - host: tv.archifleks.net
+      http:
+        paths:
+          - backend:
+              serviceName: sickrage
+              servicePort: 8081
+---
+apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: sickrage
@@ -30,9 +45,9 @@ spec:
       containers:
         - name: sickrage
           image: "linuxserver/sickrage"
+          imagePullPolicy: Always
           ports:
-            - name: sick-port
-              containerPort: 8081
+            - containerPort: 8081
           volumeMounts:
             - name: sickrage-config
               mountPath: /config

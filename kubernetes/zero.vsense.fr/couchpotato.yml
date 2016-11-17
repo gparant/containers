@@ -12,6 +12,22 @@ spec:
     - port: 5050
 ---
 apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  namespace: default
+  name: couchpotato
+  annotations:
+    kubernetes.io/ingress.class: "traefik"
+spec:
+  rules:
+    - host: movies.archifleks.net
+      http:
+        paths:
+          - backend:
+              serviceName: couchpotato
+              servicePort: 5050
+---
+apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: couchpotato
@@ -30,6 +46,7 @@ spec:
       containers:
         - name: couchpotato
           image: "linuxserver/couchpotato"
+          imagePullPolicy: Always
           ports:
             - containerPort: 5050
           volumeMounts:
