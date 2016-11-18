@@ -14,16 +14,14 @@ data:
       [entryPoints.https]
       address = ":443"
       [entryPoints.https.tls]
-    [etcd]
-    endpoint = "etcd:2379"
     [kubernetes]
     [web]
     address = ":8080"
     [acme]
-    email = "kevin.lefevre@osones.com"
+    caServer = "https://acme-staging.api.letsencrypt.org/directory"
+    email = "lefevre.kevin@gmail.com"
     storage = "traefik/acme/account"
     entryPoint = "https"
-    onDemand = true
     onHostRule = true
     [[acme.domains]]
     main = "archifleks.xyz"

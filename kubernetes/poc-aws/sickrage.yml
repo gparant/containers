@@ -78,3 +78,18 @@ spec:
         - name: sickrage-downloads
           persistentVolumeClaim:
             claimName: sickrage-data
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: sickrage
+  annotations:
+    kubernetes.io/ingress.class: "traefik"
+spec:
+  rules:
+    - host: sickrage.archifleks.xyz
+      http:
+        paths:
+          - backend:
+              serviceName: sickrage
+              servicePort: 8081

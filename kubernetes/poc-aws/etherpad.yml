@@ -1,0 +1,49 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: etherpad
+  labels:
+    app: etherpad
+spec:
+  selector:
+    app: etherpad
+  ports:
+    - port: 9001
+      targetPort: etherpad-port
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: etherpad
+  labels:
+    app: etherpad
+spec:
+  replicas: 1
+  revisionHistoryLimit: 0
+  template:
+    metadata:
+      labels:
+        app: etherpad
+    spec:
+      containers:
+        - name: etherpad
+          image: "osones/etherpad:alpine"
+          ports:
+            - name: etherpad-port
+              containerPort: 9001
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: etherpad
+  annotations:
+    kubernetes.io/ingress.class: "traefik"
+spec:
+  rules:
+    - host: etherpad.archifleks.xyz
+      http:
+        paths:
+          - backend:
+              serviceName: etherpad
+              servicePort: 9001

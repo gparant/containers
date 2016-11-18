@@ -3,42 +3,44 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    name: etcdv3
-  name: etcdv3
+    name: etcd
+  name: etcd
 spec:
-  type: NodePort
-  clusterIP: 10.3.0.100
+  clusterIP: None
   ports:
     - port: 2379
-      name: etcdv3-client
-      targetPort: etcdv3-client
+      name: etcd-client
+      targetPort: etcd-client
+    - port: 2380
+      name: etcd-peers
+      targetPort: etcd-peers
   selector:
-    daemon: etcdv3
+    daemon: etcd
 ---
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
-  name: etcdv3
+  name: etcd
   labels:
-    app: etcdv3
+    app: etcd
 spec:
   template:
     metadata:
-      name: etcdv3
+      name: etcd
       labels:
-        daemon: etcdv3
+        daemon: etcd
     spec:
       containers:
-      - name: etcdv3
+      - name: etcd
         image: quay.io/coreos/etcd:v2.3.7
         imagePullPolicy: Always
         ports:
-        - name: etcdv3-peers
+        - name: etcd-peers
           containerPort: 2380
-        - name: etcdv3-client
+        - name: etcd-client
           containerPort: 2379
         volumeMounts:
-        - name: etcdv3-data
+        - name: etcd-data
           mountPath: /var/lib/etcd
         - name: ca-certificates
           mountPath: /etc/ssl/certs
@@ -62,11 +64,10 @@ spec:
         - name: ETCD_LISTEN_PEER_URLS
           value: http://$(POD_IP):2380
         - name: ETCD_DISCOVERY
-          value: https://discovery.etcd.io/0965f250fc18ddcd0613adbb43ded23f
+          value: https://discovery.etcd.io/6aa40b8246fcabd28c67a3c38dac5286
       volumes:
-      - name: etcdv3-data
-        hostPath:
-          path: /srv/etcdv2
+      - name: etcd-data
+        emptyDir: {}
       - name: ca-certificates
         hostPath:
           path: /usr/share/ca-certificates/

@@ -12,7 +12,7 @@ spec:
           configMap:
             name: traefik-conf
       containers:
-        - image: containous/traefik:experimental
+        - image: containous/traefik:v1.1.0-rc4
           name: traefik-ingress-lb
           imagePullPolicy: Always
           volumeMounts:
@@ -20,12 +20,11 @@ spec:
               name: "config"
           ports:
             - containerPort: 80
-              hostPort: 80
             - containerPort: 443
-              hostPort: 443
             - containerPort: 8080
           args:
             - storeconfig
             - --configfile=/config/traefik.toml
+            - --etcd
+            - --etcd.endpoint=etcd:2379
       restartPolicy: Never
-
