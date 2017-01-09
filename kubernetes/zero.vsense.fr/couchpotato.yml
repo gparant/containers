@@ -51,9 +51,7 @@ spec:
             - containerPort: 5050
           volumeMounts:
             - name: couchpotato-data
-              mountPath: /config/data
-            - name: couchpotato-config
-              mountPath: /config/config.ini
+              mountPath: /config
             - name: couchpotato-downloads
               mountPath: /downloads
           env:
@@ -67,9 +65,6 @@ spec:
         - name: couchpotato-data
           hostPath:
             path: /srv/configs/couchpotato
-        - name: couchpotato-config
-          hostPath:
-            path: /srv/configs/couchpotato/config.ini
         - name: couchpotato-downloads
           hostPath:
             path: /srv/seedbox

@@ -80,7 +80,7 @@ spec:
               exec:
                 command:
                   - "rm"
-                  - "/download/sessions/rtorrent.lock"
+                  - "/downloads/sessions/rtorrent.lock"
           ports:
             - containerPort: 80
             - containerPort: 5000
