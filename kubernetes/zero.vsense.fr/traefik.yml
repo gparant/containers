@@ -92,7 +92,7 @@ spec:
     spec:
       containers:
         - name: traefik-ingress-lb
-          image: "containous/traefik:experimental"
+          image: "containous/traefik:v1.1.2"
           imagePullPolicy: Always
           volumeMounts:
             - mountPath: "/config"
