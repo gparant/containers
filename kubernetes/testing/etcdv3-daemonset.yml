@@ -7,7 +7,6 @@ metadata:
   name: etcdv3
 spec:
   type: NodePort
-  clusterIP: 10.3.0.100
   ports:
     - port: 2379
       name: etcdv3-client
@@ -38,8 +37,6 @@ spec:
         - name: etcdv3-client
           containerPort: 2379
         volumeMounts:
-        - name: etcdv3-data
-          mountPath: /var/lib/etcd
         - name: ca-certificates
           mountPath: /etc/ssl/certs
         env:
@@ -62,11 +59,8 @@ spec:
         - name: ETCD_LISTEN_PEER_URLS
           value: http://$(POD_IP):2380
         - name: ETCD_DISCOVERY
-          value: https://discovery.etcd.io/4a3ef22d428bd05528c054fa1a626bd5
+          value: https://discovery.etcd.io/9df501ec0a5df21e72db3541f793283e
       volumes:
-      - name: etcdv3-data
-        hostPath:
-          path: /srv/etcdv3
       - name: ca-certificates
         hostPath:
-          path: /usr/share/ca-certificates/
+          path: /etc/ssl/certs

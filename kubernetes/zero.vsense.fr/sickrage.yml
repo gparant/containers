@@ -6,6 +6,7 @@ metadata:
   labels:
     app: sickrage
 spec:
+  type: NodePort
   selector:
     app: sickrage
   ports:
@@ -48,11 +49,6 @@ spec:
           imagePullPolicy: Always
           ports:
             - containerPort: 8081
-          volumeMounts:
-            - name: sickrage-config
-              mountPath: /config
-            - name: sickrage-downloads
-              mountPath: /downloads
           env:
             - name: VERSION
               value: "latest"
@@ -62,10 +58,3 @@ spec:
               value: "5001"
             - name: TZ
               value: "Europe/Paris"
-      volumes:
-        - name: sickrage-config
-          hostPath:
-            path: /srv/configs/sickrage
-        - name: sickrage-downloads
-          hostPath:
-            path: /srv/seedbox
