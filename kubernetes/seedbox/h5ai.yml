@@ -2,6 +2,7 @@
 apiVersion: v1
 kind: Service
 metadata:
+  namespace: seedbox
   name: h5ai
   labels:
     app: h5ai
@@ -15,6 +16,7 @@ spec:
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
+  namespace: seedbox
   name: seedbox
   annotations:
     kubernetes.io/ingress.class: "traefik"
@@ -30,6 +32,7 @@ spec:
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
+  namespace: seedbox
   name: h5ai
   labels:
     app: h5ai
@@ -45,7 +48,7 @@ spec:
         fsGroup: 5001
       containers:
         - name: h5ai
-          image: "vsense/h5ai:latest"
+          image: "vsense/h5ai"
           imagePullPolicy: Always
           ports:
             - name: h5ai-port

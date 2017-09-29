@@ -2,6 +2,7 @@
 apiVersion: v1
 kind: Service
 metadata:
+  namespace: seedbox
   name: rtorrent
   labels:
     app: rtorrent
@@ -27,6 +28,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
+  namespace: seedbox
   name: rtorrent-internal
   labels:
     app: rtorrent
@@ -42,7 +44,7 @@ spec:
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  namespace: default
+  namespace: seedbox
   name: torrents
   annotations:
     kubernetes.io/ingress.class: "traefik"
@@ -58,6 +60,7 @@ spec:
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
+  namespace: seedbox
   name: rtorrent
   labels:
     app: rtorrent
@@ -73,7 +76,7 @@ spec:
         fsGroup: 5001
       containers:
         - name: rtorrent
-          image: "vsense/rtorrent:latest"
+          image: "linuxserver/rutorrent"
           imagePullPolicy: Always
           lifecycle:
             preStop:
@@ -81,20 +84,71 @@ spec:
                 command:
                   - "rm"
                   - "/downloads/sessions/rtorrent.lock"
+          env:
+            - name: PGID
+              value: "5001"
+            - name: PUID
+              value: "5001"
+            - name: TZ
+              value: "Europe/Paris"
           ports:
             - containerPort: 80
             - containerPort: 5000
             - containerPort: 6881
             - containerPort: 51413
           volumeMounts:
-            - name: rutorrent-config
-              mountPath: /rutorrent
+            - name: rtorrent-config
+              mountPath: /config/rtorrent/rtorrent.rc
+              subPath: rtorrent.rc
             - name: rtorrent-downloads
               mountPath: /downloads
+            - name: rutorrent-config
+              mountPath: /config/rutorrent
       volumes:
+        - name: rtorrent-config
+          configMap:
+            name: rtorrent-config
         - name: rutorrent-config
           hostPath:
             path: /srv/configs/rutorrent
         - name: rtorrent-downloads
           hostPath:
             path: /srv/seedbox
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: seedbox
+  name: rtorrent-config
+data:
+  rtorrent.rc: |
+    execute = {sh,-c,/usr/bin/php7 /usr/share/webapps/rutorrent/php/initplugins.php abc &}
+    execute.nothrow = rm,/run/php/.rtorrent.sock
+    network.scgi.open_local = /run/php/.rtorrent.sock
+    schedule = socket_chmod,0,0,"execute=chmod,0660,/run/php/.rtorrent.sock"
+    schedule = socket_chgrp,0,0,"execute=chgrp,abc,/run/php/.rtorrent.sock"
+    log.open_file = "rtorrent", /config/log/rtorrent/rtorrent.log
+    log.add_output = "info", "rtorrent"
+    min_peers = 40
+    max_peers = 1200
+    max_uploads = 15
+    download_rate = 15000
+    upload_rate = 5000
+    # schedule = watch_directory_1,5,5,"load.start=/downloads/watched/*.torrent"
+    directory = /downloads/incoming
+    session = /downloads/sessions
+    schedule = low_diskspace,5,60,close_low_diskspace=100M
+    ip = 178.32.28.59
+    bind = 0.0.0.0
+    port_range = 51413-51413
+    check_hash = yes
+    use_udp_trackers = yes
+    encryption = allow_incoming,try_outgoing,enable_retry
+    dht = auto
+    dht_port = 6881
+    peer_exchange = yes
+    # network.http.ssl_verify_peer.set=0
+    #scgi_port = 0.0.0.0:5000
+    encoding_list = UTF-8
+    system.umask.set = 022
+---

@@ -1,0 +1,50 @@
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  namespace: default
+  name: ghost
+  labels:
+    app: ghost
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: ghost
+    spec:
+      containers:
+        - name: ghost
+          image: ghost
+          imagePullPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: default
+  name: ghost
+  labels:
+    app: ghost
+spec:
+  selector:
+    app: ghost
+  ports:
+    - port: 2368
+      name: http
+      targetPort: 2368
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  namespace: default
+  name: ghost
+  annotations:
+    kubernetes.io/ingress.class: "traefik"
+spec:
+  rules:
+    - host: ghost.archifleks.net
+      http:
+        paths:
+          - backend:
+              serviceName: ghost
+              servicePort: 2368

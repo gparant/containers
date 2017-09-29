@@ -1,0 +1,72 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: couchpotato
+  labels:
+    app: couchpotato
+  namespace: seedbox
+spec:
+  selector:
+    app: couchpotato
+  ports:
+    - port: 5050
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  namespace: seedbox
+  name: couchpotato
+  annotations:
+    kubernetes.io/ingress.class: "traefik"
+spec:
+  rules:
+    - host: movies.archifleks.net
+      http:
+        paths:
+          - backend:
+              serviceName: couchpotato
+              servicePort: 5050
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  namespace: seedbox
+  name: couchpotato
+  labels:
+    app: couchpotato
+spec:
+  replicas: 1
+  revisionHistoryLimit: 0
+  template:
+    metadata:
+      labels:
+        app: couchpotato
+    spec:
+      securityContext:
+        fsGroup: 5001
+      containers:
+        - name: couchpotato
+          image: "linuxserver/couchpotato"
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 5050
+          volumeMounts:
+            - name: couchpotato-data
+              mountPath: /config
+            - name: couchpotato-downloads
+              mountPath: /downloads
+          env:
+            - name: PGID
+              value: "5001"
+            - name: PUID
+              value: "5001"
+            - name: TZ
+              value: Europe/Paris
+      volumes:
+        - name: couchpotato-data
+          hostPath:
+            path: /srv/configs/couchpotato
+        - name: couchpotato-downloads
+          hostPath:
+            path: /srv/seedbox
