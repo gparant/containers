@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    k8s-app: kube-addon-manager
+  name: kube-addon-manager
+spec:
+  replicas: 1
+  revisionHistoryLimit: 0
+  selector:
+    matchLabels:
+      k8s-app: kube-addon-manager
+  template:
+    metadata:
+      labels:
+        k8s-app: kube-addon-manager
+      name: kube-addon-manager
+      namespace: kube-system
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: beta.kubernetes.io/arch
+                operator: In
+                values:
+                - amd64
+      containers:
+      - image: gcr.io/google-containers/kube-addon-manager:v8.6
+        imagePullPolicy: Always
+        name: kube-addon-manager
+        resources:
+          requests:
+            cpu: 5m
+            memory: 50Mi
+          limits:
+            cpu: 200m
+            memory: 200M
+        volumeMounts:
+        - mountPath: /etc/kubernetes/addons
+          name: addons
+          readOnly: true
+        - mountPath: /var/log
+          name: varlog
+        - mountPath: /etc/hosts
+          name: hosts
+          readOnly: true
+      hostNetwork: true
+      serviceAccount: kube-addons
+      serviceAccountName: kube-addons
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - hostPath:
+          path: /etc/kubernetes/addons
+          type: ""
+        name: addons
+      - hostPath:
+          path: /var/log
+          type: ""
+        name: varlog
+      - hostPath:
+          path: /etc/hosts
+          type: ""
+        name: hosts
