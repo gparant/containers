@@ -1,0 +1,85 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: plex
+  name: plex
+spec:
+  replicas: 1
+  revisionHistoryLimit: 0
+  selector:
+    matchLabels:
+      app: plex
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: plex
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: beta.kubernetes.io/arch
+                operator: In
+                values:
+                - amd64
+      containers:
+      - env:
+        - name: VERSION
+          value: latest
+        - name: PGID
+          value: "5001"
+        - name: PUID
+          value: "5001"
+        - name: TZ
+          value: Europe/Paris
+        image: linuxserver/plex
+        imagePullPolicy: Always
+        lifecycle:
+          preStop:
+            exec:
+              command:
+              - rm
+              - /config/Library/Application Support/Plex Media Server/plexmediaserver.pid
+        name: plex
+        ports:
+        - containerPort: 32400
+          hostPort: 32400
+          protocol: TCP
+        - containerPort: 32400
+          hostPort: 32400
+          protocol: UDP
+        volumeMounts:
+        - mountPath: /config/Library/Application Support
+          name: plex-config
+        - mountPath: /library
+          name: plex-library
+        - mountPath: /tmp
+          name: tmp
+        resources:
+          requests:
+            cpu: 1
+            memory: 500M
+          limits:
+            cpu: 2
+      restartPolicy: Always
+      securityContext:
+        fsGroup: 5001
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - hostPath:
+          path: /srv/configs/plex
+          type: ""
+        name: plex-config
+      - hostPath:
+          path: /srv/seedbox
+          type: ""
+        name: plex-library
+      - hostPath:
+          path: /tmp
+          type: ""
+        name: tmp
