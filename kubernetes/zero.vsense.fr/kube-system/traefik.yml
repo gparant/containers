@@ -1,0 +1,100 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: traefik-conf
+data:
+  traefik.toml: |
+    # traefik.toml
+    logLevel = "INFO"
+    defaultEntryPoints = ["http","https"]
+    [entryPoints]
+      [entryPoints.http]
+        address = ":80"
+      [entryPoints.http.redirect]
+        entryPoint = "https"
+      [entryPoints.https]
+        address = ":443"
+      [entryPoints.https.tls]
+    [web]
+    [kubernetes]
+    [acme]
+      email = "lefevre.kevin@gmail.com"
+      storage = "/acme/acme.json"
+      entryPoint = "https"
+    [acme.dnsChallenge]
+      provider = "route53"
+      delayBeforeCheck = 0
+    [[acme.domains]]
+      main = "*.archifleks.net"
+      sans = ["archifleks.net"]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    k8s-app: traefik-ingress-lb
+  name: traefik-ingress-controller
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 0
+  selector:
+    matchLabels:
+      k8s-app: traefik-ingress-lb
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        k8s-app: traefik-ingress-lb
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: beta.kubernetes.io/arch
+                operator: In
+                values:
+                - amd64
+      containers:
+      - args:
+        - --configfile=/config/traefik.toml
+        image: traefik:v1.6.0
+        imagePullPolicy: Always
+        name: traefik-ingress-lb-init
+        resources:
+          requests:
+            cpu: 100m
+            memory: 20Mi
+          limits:
+            cpu: 200m
+        ports:
+        - containerPort: 80
+          hostPort: 80
+          protocol: TCP
+        - containerPort: 443
+          hostPort: 443
+          protocol: TCP
+        - containerPort: 8080
+          protocol: TCP
+        volumeMounts:
+        - mountPath: /config
+          name: config
+        - mountPath: /acme/acme.json
+          name: acme
+        envFrom:
+        - secretRef:
+            name: aws-route53-creds
+      restartPolicy: Always
+      serviceAccount: traefik-ingress-controller
+      serviceAccountName: traefik-ingress-controller
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - configMap:
+          defaultMode: 420
+          name: traefik-conf
+        name: config
+      - hostPath:
+          path: /srv/configs/acme/acme.json
+        name: acme
