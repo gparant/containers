@@ -22,41 +22,65 @@ metadata:
     kubernetes.io/ingress.class: "traefik"
 spec:
   rules:
-    - host: seedbox.archifleks.net
+    - host: dl.archifleks.net
       http:
         paths:
           - backend:
               serviceName: h5ai
               servicePort: 80
 ---
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
-  namespace: seedbox
-  name: h5ai
   labels:
     app: h5ai
+  name: h5ai
 spec:
   replicas: 1
   revisionHistoryLimit: 0
+  selector:
+    matchLabels:
+      app: h5ai
   template:
     metadata:
       labels:
         app: h5ai
     spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: beta.kubernetes.io/arch
+                operator: In
+                values:
+                - amd64
+      containers:
+      - image: vsense/h5ai
+        imagePullPolicy: Always
+        name: h5ai
+        resources:
+          requests:
+            cpu: 10m
+            memory: 50M
+          limits:
+            cpu: 200m
+            memory: 300M
+        ports:
+        - containerPort: 80
+          name: h5ai-port
+          protocol: TCP
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /var/www
+          name: h5ai-directory
+      restartPolicy: Always
       securityContext:
         fsGroup: 5001
-      containers:
-        - name: h5ai
-          image: "vsense/h5ai"
-          imagePullPolicy: Always
-          ports:
-            - name: h5ai-port
-              containerPort: 80
-          volumeMounts:
-            - name: h5ai-directory
-              mountPath: /var/www
+      terminationGracePeriodSeconds: 30
       volumes:
-        - name: h5ai-directory
-          hostPath:
-            path: /srv/seedbox
+      - hostPath:
+          path: /srv/seedbox
+          type: ""
+        name: h5ai-directory

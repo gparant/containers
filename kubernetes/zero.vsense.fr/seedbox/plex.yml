@@ -62,7 +62,7 @@ spec:
           name: tmp
         resources:
           requests:
-            cpu: 1
+            cpu: 2
             memory: 500M
           limits:
             cpu: 2

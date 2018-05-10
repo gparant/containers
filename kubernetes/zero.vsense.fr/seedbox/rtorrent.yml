@@ -75,6 +75,8 @@ metadata:
   name: rtorrent
 spec:
   replicas: 1
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: rtorrent
@@ -113,7 +115,7 @@ spec:
             cpu: 1
             memory: 200M
           limits:
-            cpu: 1
+            cpu: 2
         name: rtorrent
         ports:
         - containerPort: 80
