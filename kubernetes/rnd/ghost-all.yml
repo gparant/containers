@@ -22,10 +22,11 @@ apiVersion: v1
 kind: Service
 metadata:
   namespace: default
-  name: ghost
+  name: ghost-svc-2
   labels:
     app: ghost
 spec:
+  type: LoadBalancer
   selector:
     app: ghost
   ports:
