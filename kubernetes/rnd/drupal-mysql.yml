@@ -1,0 +1,76 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql
+spec:
+  ports:
+    - name: mysql
+      port: 3306
+      protocol: TCP
+  selector:
+    app: mysql
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: mysql
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+        - env:
+          - name: MYSQL_ROOT_PASSWORD
+            value: password
+          - name: MYSQL_DATABASE
+            value: drupal
+          - name: MYSQL_USER
+            value: drupal
+          - name: MYSQL_PASSWORD
+            value: drupal
+          image: "mysql:5.7"
+          name: mysql
+          ports:
+            - containerPort: 3306
+              name: mysql
+              protocol: TCP
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: drupal
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: drupal
+    spec:
+      containers:
+        - image: drupal:8
+          name: drupal
+          env:
+            - name: MARIADB_HOST
+              value: mysql
+            - name: MARIADB_PORT_NUMBER
+              value: "3306"
+            - name: DRUPAL_DATABASE_NAME
+              value: drupal
+            - name: DRUPAL_DATABASE_USER
+              value: drupal
+            - name: DRUPAL_DATABASE_PASSWORD
+              value: drupal
+            - name: DRUPAL_USERNAME
+              value: admin
+            - name: DRUPAL_PASSWORD
+              value: password
+            - name: DRUPAL_EMAIL
+              value: test@test.com
+          ports:
+            - containerPort: 80
+              name: drupal
+              protocol: TCP
